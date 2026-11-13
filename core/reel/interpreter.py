@@ -1,11 +1,14 @@
 """Interpreter: runs a parsed program and returns the printed output."""
 
 from .errors import ReelError
+from .builtins import BUILTIN_SCENES, NOTHING
 
 MAX_CALL_DEPTH = 100
 MAX_WHILE_TURNS = 100000
 
-NOTHING = object()  # the value a scene returns when it has no GIVE BACK
+# Names owned by built-in scenes (CALL random_between ... etc.).
+# The loader uses this to reject user scenes with these names.
+BUILTIN_SCENE_NAMES = frozenset(BUILTIN_SCENES)
 
 
 class _ReturnSignal(Exception):
@@ -17,11 +20,13 @@ class _ReturnSignal(Exception):
 
 
 class Interpreter:
-    def __init__(self, scenes):
+    def __init__(self, scenes, safe=False, base_dir=None):
         self.scenes = {s["name"]: s for s in scenes}
         self.vars = {}          # main scene's variables
         self.output_lines = []
         self.call_depth = 0
+        self.safe = safe                  # safe mode: no file access (v0.3)
+        self.base_dir = base_dir          # folder for reel_files/ and IMPORTs
 
     def run(self):
         if "main" not in self.scenes:
@@ -31,6 +36,10 @@ class Interpreter:
             self.exec_block(main["body"], self.vars, main["line"])
         except _ReturnSignal:
             pass  # GIVE BACK in main simply ends the show
+        except ReelError as e:
+            if e.origin is None:
+                e.origin = main.get("origin")
+            raise
         return "\n".join(self.output_lines) + ("\n" if self.output_lines else "")
 
     # ---------- statements ----------
@@ -186,6 +195,9 @@ class Interpreter:
     # ---------- scenes ----------
 
     def call_scene(self, name, args, line):
+        builtin = BUILTIN_SCENES.get(name)
+        if builtin is not None:
+            return builtin(self, args, line)
         scene = self.scenes.get(name)
         if scene is None:
             raise ReelError(line, f'I do not know a scene called "{name}".')
@@ -209,6 +221,10 @@ class Interpreter:
             self.exec_block(scene["body"], frame, scene["line"])
         except _ReturnSignal as ret:
             return ret.value
+        except ReelError as e:
+            if e.origin is None:
+                e.origin = scene.get("origin")
+            raise
         finally:
             self.call_depth -= 1
         return NOTHING
@@ -259,5 +275,5 @@ def _is_number(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
-def interpret(scenes):
-    return Interpreter(scenes).run()
+def interpret(scenes, safe=False, base_dir=None):
+    return Interpreter(scenes, safe=safe, base_dir=base_dir).run()

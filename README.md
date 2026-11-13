@@ -58,6 +58,29 @@ CUT
 Try `examples/v02_demo.reel` for a larger v0.2 program with lists, a loop,
 and a reusable scene.
 
+## Version 0.3: libraries, useful built-ins, and files
+
+Version 0.3 adds imported Reel files and built-in libraries. For example,
+`IMPORT LIB "fun"` gives you `dice`, `coin_flip`, and `shout`. Built-in scenes
+also help with random choices, words, dates, and (outside safe mode) small
+files stored in `reel_files/` beside your program.
+
+Try these examples:
+
+- `examples/v03_demo.reel` uses the `fun` library, a date, and random words.
+- `examples/random_between.reel` chooses a number in a range.
+- `examples/words.reel` cleans and searches text.
+- `examples/dates.reel` works out a future weekday.
+- `examples/files_demo.reel` writes and reads `Hello file`.
+
+You can also try Reel online at [axel0935.github.io/reel](https://axel0935.github.io/reel/).
+
+## Editor extension
+
+The project includes a small Reel extension for VSCodium. It adds `.reel`
+syntax colors, comment support, automatic closing quotes, and starter snippets.
+Read [editor/README.md](editor/README.md) for Ubuntu installation steps.
+
 ## Run a Reel file
 
 From the project folder, run:

@@ -1,0 +1,6 @@
+SCENE main
+  SET message TO "  Welcome to Reel  "
+  SET clean TO CALL trim WITH message
+  SAY CALL upper WITH clean
+  SAY "Has Reel: " JOIN (CALL contains WITH clean, "Reel")
+CUT

@@ -1,0 +1,41 @@
+SCENE max_of WITH a, b
+  IF a BIGGER THAN b
+    GIVE BACK a
+  OTHERWISE
+    GIVE BACK b
+  END
+CUT
+
+SCENE min_of WITH a, b
+  IF a SMALLER THAN b
+    GIVE BACK a
+  OTHERWISE
+    GIVE BACK b
+  END
+CUT
+
+SCENE average WITH list
+  IF LENGTH OF list EQUALS 0
+    GIVE BACK 0
+  END
+  SET total TO 0
+  FOR EACH item IN list
+    SET total TO total PLUS item
+  END
+  GIVE BACK total DIVIDED BY LENGTH OF list
+CUT
+
+SCENE is_even WITH n
+  SET half TO n DIVIDED BY 2
+  GIVE BACK half TIMES 2 EQUALS n
+CUT
+
+SCENE power WITH base, times
+  SET result TO 1
+  SET i TO 0
+  WHILE i SMALLER THAN times
+    SET result TO result TIMES base
+    SET i TO i PLUS 1
+  END
+  GIVE BACK result
+CUT

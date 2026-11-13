@@ -1,0 +1,11 @@
+SCENE shout WITH text
+  GIVE BACK (CALL upper WITH text) JOIN "!"
+CUT
+
+SCENE coin_flip
+  GIVE BACK CALL random_pick WITH (LIST "heads", "tails")
+CUT
+
+SCENE dice
+  GIVE BACK CALL random_between WITH 1, 6
+CUT

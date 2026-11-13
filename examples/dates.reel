@@ -1,0 +1,5 @@
+SCENE main
+  SET launch_day TO CALL add_days WITH "2026-11-13", 7
+  SAY "Launch date: " JOIN launch_day
+  SAY "It is a " JOIN (CALL weekday WITH launch_day)
+CUT

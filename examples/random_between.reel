@@ -1,0 +1,4 @@
+SCENE main
+  SET lucky_number TO CALL random_between WITH 1, 100
+  SAY "Your lucky rocket number is " JOIN lucky_number
+CUT

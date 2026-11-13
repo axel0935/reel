@@ -70,12 +70,37 @@ class Parser:
     # ---------- program & scenes ----------
 
     def parse_program(self):
+        imports = []
         scenes = []
         self.skip_newlines()
+        # IMPORT lines must come before any SCENE
+        while self.at_word("IMPORT"):
+            imports.append(self.parse_import())
+            self.skip_newlines()
         while self.peek().kind != "EOF":
+            if self.at_word("IMPORT"):
+                raise ReelError(
+                    self.peek().line,
+                    "IMPORT must be at the top of the file, before any SCENE.",
+                )
             scenes.append(self.parse_scene())
             self.skip_newlines()
-        return scenes
+        return {"imports": imports, "scenes": scenes}
+
+    def parse_import(self):
+        start = self.expect_word("IMPORT")
+        is_lib = False
+        if self.at_word("LIB"):
+            self.next()
+            is_lib = True
+        name_tok = self.next()
+        if name_tok.kind != "STRING":
+            raise ReelError(
+                name_tok.line,
+                'After IMPORT I need a file name in quotes, like IMPORT "maths".',
+            )
+        self.expect_newline()
+        return ("import", "lib" if is_lib else "file", name_tok.value, start.line)
 
     def parse_scene(self):
         start = self.expect_word("SCENE")
@@ -147,6 +172,11 @@ class Parser:
             return self.parse_giveback()
         if t.value == "ADD":
             return self.parse_add_statement()
+        if t.value == "IMPORT":
+            raise ReelError(
+                t.line,
+                "IMPORT must be at the top of the file, before any SCENE.",
+            )
         raise ReelError(
             t.line,
             f'I do not understand "{t.value}" here. '

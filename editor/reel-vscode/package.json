@@ -1,0 +1,34 @@
+{
+  "name": "reel-language",
+  "displayName": "Reel Language",
+  "description": "Syntax highlighting and snippets for Reel movie-script programs.",
+  "version": "0.3.0",
+  "publisher": "axel0935",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "reel",
+        "aliases": ["Reel", "reel"],
+        "extensions": [".reel"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "reel",
+        "scopeName": "source.reel",
+        "path": "./syntaxes/reel.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "reel",
+        "path": "./snippets/reel.code-snippets"
+      }
+    ]
+  }
+}

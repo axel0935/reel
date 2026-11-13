@@ -1,0 +1,27 @@
+{
+  "Scene": {
+    "prefix": "scene",
+    "body": ["SCENE ${1:main}", "  ${0}", "CUT"],
+    "description": "Create a Reel scene"
+  },
+  "If": {
+    "prefix": "if",
+    "body": ["IF ${1:condition}", "  ${0}", "END"],
+    "description": "Create an IF block"
+  },
+  "Repeat": {
+    "prefix": "repeat",
+    "body": ["REPEAT ${1:3} TIMES", "  ${0}", "END"],
+    "description": "Create a REPEAT block"
+  },
+  "For each": {
+    "prefix": "foreach",
+    "body": ["FOR EACH ${1:item} IN ${2:list}", "  ${0}", "END"],
+    "description": "Create a FOR EACH block"
+  },
+  "While": {
+    "prefix": "while",
+    "body": ["WHILE ${1:condition}", "  ${0}", "END"],
+    "description": "Create a WHILE block"
+  }
+}

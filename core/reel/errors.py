@@ -1,10 +1,16 @@
 class ReelError(Exception):
-    """A friendly Reel error. Always carries a line number."""
+    """A friendly Reel error. Always carries a line number.
 
-    def __init__(self, line, message):
+    `origin` is the file name when the error comes from an imported file
+    (e.g. "maths.reel"); it is None for the main file.
+    """
+
+    def __init__(self, line, message, origin=None):
         self.line = line
         self.message = message
-        super().__init__(f"Line {line}: {message}")
+        self.origin = origin
+        super().__init__(str(self))
 
     def __str__(self):
-        return f"Line {self.line}: {self.message}"
+        prefix = f"{self.origin}, " if self.origin else ""
+        return f"{prefix}Line {self.line}: {self.message}"

@@ -1,0 +1,4 @@
+SCENE main
+  CALL write_file WITH "hello.txt", "Hello file"
+  SAY CALL read_file WITH "hello.txt"
+CUT

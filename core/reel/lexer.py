@@ -9,6 +9,8 @@ KEYWORDS = {
     # v0.2
     "WITH", "CALL", "GIVE", "BACK", "NOTHING", "LIST", "ADD", "AT",
     "LENGTH", "OF", "FOR", "EACH", "IN", "WHILE",
+    # v0.3
+    "IMPORT", "LIB",
 }
 
 

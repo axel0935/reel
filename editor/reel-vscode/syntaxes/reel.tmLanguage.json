@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Reel",
+  "scopeName": "source.reel",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#keywords" },
+    { "include": "#builtins" },
+    { "include": "#numbers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-dash.reel", "match": "--.*$" }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        { "name": "string.quoted.double.reel", "begin": "\\\"", "end": "\\\"" }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.reel",
+          "match": "\\b(?:SCENE|CUT|WITH|SET|TO|SAY|IF|OTHERWISE|END|REPEAT|TIMES|PLUS|MINUS|DIVIDED|BY|JOIN|EQUALS|BIGGER|THAN|SMALLER|AND|OR|NOT|YES|NO|CALL|GIVE|BACK|NOTHING|LIST|ADD|AT|LENGTH|OF|FOR|EACH|IN|WHILE|IMPORT|LIB)\\b"
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "support.function.reel",
+          "match": "\\b(?:random_between|random_pick|shuffle|upper|lower|trim|split|glue|replace|contains|starts_with|to_number|today|now|days_between|add_days|weekday|read_file|read_lines|write_file|append_file|file_exists|max_of|min_of|average|is_even|power|shout|coin_flip|dice)\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        { "name": "constant.numeric.reel", "match": "\\b\\d+(?:\\.\\d+)?\\b" }
+      ]
+    }
+  }
+}

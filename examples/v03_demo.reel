@@ -1,0 +1,10 @@
+IMPORT LIB "fun"
+
+SCENE main
+  SET roll TO CALL dice
+  SAY "You rolled " JOIN roll
+  SET d TO CALL today
+  SAY "Today is " JOIN (CALL weekday WITH d)
+  SET words TO CALL split WITH "the quick brown fox", " "
+  SAY CALL shout WITH (CALL random_pick WITH words)
+CUT
