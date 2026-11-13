@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reel Studio &bull; Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Bar / Navigation -->
+    <header class="top-nav">
+      <div class="brand">
+        <span class="clapper-icon" aria-hidden="true">🎬</span>
+        <div>
+          <h1 class="logo">REEL <span class="tag">STUDIO</span></h1>
+          <p class="tagline">The script-writing programming language</p>
+        </div>
+      </div>
+
+      <div class="controls-panel">
+        <div class="control-group">
+          <label for="example-select" class="control-label">Scene Script:</label>
+          <div class="select-wrapper">
+            <select id="example-select">
+              <option value="" disabled selected>Loading scenes...</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="run-btn" class="btn btn-action" title="Run scene (Ctrl+Enter)">
+          <span class="btn-icon">▶</span>
+          <span class="btn-text">Action!</span>
+          <kbd class="shortcut-badge">Ctrl+Enter</kbd>
+        </button>
+
+        <button id="clear-btn" class="btn btn-secondary" title="Clear code and output">
+          Reset
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Studio Split View -->
+    <main class="studio-workspace">
+      <!-- Editor Column -->
+      <section class="panel editor-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon">📜</span>
+            <span id="current-filename">script.reel</span>
+          </div>
+          <div class="panel-actions">
+            <span class="editor-hint">Tab to indent</span>
+          </div>
+        </div>
+        <div class="editor-wrapper">
+          <textarea
+            id="code-input"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            placeholder="Write your Reel scene here...&#10;&#10;SCENE main&#10;  SAY &quot;Action!&quot;&#10;CUT"
+          ></textarea>
+        </div>
+      </section>
+
+      <!-- Screening Room (Output) Column -->
+      <section class="panel output-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon">📽️</span>
+            <span>Screening Room</span>
+          </div>
+          <div class="panel-status">
+            <span id="status-indicator" class="status-dot"></span>
+            <span id="status-text">Ready</span>
+          </div>
+        </div>
+
+        <div class="output-wrapper">
+          <div id="error-banner" class="error-banner hidden" role="alert">
+            <div class="error-header">
+              <span class="error-icon">⚠️</span>
+              <strong id="error-title">Scene Interrupted</strong>
+            </div>
+            <div id="error-message" class="error-body"></div>
+          </div>
+
+          <div class="console-screen">
+            <div class="screen-glare"></div>
+            <pre id="output-box" class="output-content">Click "Action!" or press Ctrl+Enter to run your scene.</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer Quick Cheat Sheet -->
+    <footer class="studio-footer">
+      <div class="quick-ref">
+        <span class="ref-title">Quick Keywords:</span>
+        <code>SCENE main ... CUT</code>
+        <code>SET x TO y</code>
+        <code>SAY expression</code>
+        <code>IF cond ... OTHERWISE ... END</code>
+        <code>REPEAT n TIMES ... END</code>
+      </div>
+      <div class="footer-meta">
+        Reel v0.1 &bull; Powered by Python Standard Library
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
