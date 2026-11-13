@@ -1,4 +1,4 @@
-"""Contract tests for Reel v0.1.
+"""Contract tests for Reel v0.1 and v0.2.
 
 These tests deliberately talk to the language through its public `run` function
 only.  That keeps them independent from the parser and evaluator internals.
@@ -129,6 +129,189 @@ class ReelSpecTests(unittest.TestCase):
 
     def test_missing_main_scene_is_a_friendly_line_numbered_error(self) -> None:
         self.assert_friendly_error(program('SAY "no star"', scene="opening"), "main")
+
+
+class ReelV02SpecTests(unittest.TestCase):
+    """Contract tests for every feature added by SPEC v0.2."""
+
+    def assert_runs(self, source: str, expected_output: str) -> None:
+        result = run(source)
+        self.assertEqual(result["error"], None, result["error"])
+        self.assertEqual(result["output"], expected_output)
+
+    def assert_friendly_error(self, source: str, words: str | None = None) -> None:
+        result = run(source)
+        self.assertIsInstance(result["output"], str)
+        self.assertIsNotNone(result["error"])
+        self.assertRegex(result["error"], r"Line \d+")
+        self.assertNotRegex(
+            result["error"].lower(),
+            r"do not understand|expected the line|character",
+        )
+        if words is not None:
+            self.assertIn(words, result["error"].lower())
+
+    def test_scenes_accept_one_or_more_inputs_in_any_file_order(self) -> None:
+        self.assert_runs(
+            "SCENE add WITH a, b\n"
+            "GIVE BACK a PLUS b\n"
+            "CUT\n"
+            "SCENE main\n"
+            "SAY CALL add WITH 2, 3\n"
+            "CUT\n",
+            "5\n",
+        )
+
+    def test_call_statement_runs_a_scene_and_ignores_its_return_value(self) -> None:
+        self.assert_runs(
+            "SCENE cheer WITH name\n"
+            "SAY \"Go, \" JOIN name\n"
+            "GIVE BACK 99\n"
+            "CUT\n"
+            "SCENE main\n"
+            "CALL cheer WITH \"Mia\"\n"
+            "SAY \"Finished\"\n"
+            "CUT\n",
+            "Go, Mia\nFinished\n",
+        )
+
+    def test_call_value_can_be_used_inside_a_larger_expression(self) -> None:
+        self.assert_runs(
+            "SCENE double WITH n\n"
+            "GIVE BACK n TIMES 2\n"
+            "CUT\n"
+            "SCENE main\n"
+            "SET answer TO 1 PLUS (CALL double WITH 4)\n"
+            "SAY answer\n"
+            "CUT\n",
+            "9\n",
+        )
+
+    def test_give_back_ends_the_scene_immediately(self) -> None:
+        self.assert_runs(
+            "SCENE surprise\n"
+            "GIVE BACK \"ta-da\"\n"
+            "SAY \"too late\"\n"
+            "CUT\n"
+            "SCENE main\n"
+            "SAY CALL surprise\n"
+            "CUT\n",
+            "ta-da\n",
+        )
+
+    def test_scene_without_give_back_returns_nothing(self) -> None:
+        self.assert_runs(
+            "SCENE wave\n"
+            "SAY \"wave\"\n"
+            "CUT\n"
+            "SCENE main\n"
+            "SAY CALL wave\n"
+            "CUT\n",
+            "wave\nNOTHING\n",
+        )
+
+    def test_scene_variables_do_not_escape_their_scene(self) -> None:
+        self.assert_friendly_error(
+            "SCENE make_secret\n"
+            "SET secret TO \"shh\"\n"
+            "CUT\n"
+            "SCENE main\n"
+            "CALL make_secret\n"
+            "SAY secret\n"
+            "CUT\n",
+            "don't know",
+        )
+
+    def test_recursive_calls_stop_after_the_recursion_limit(self) -> None:
+        self.assert_friendly_error(
+            "SCENE forever WITH n\n"
+            "GIVE BACK CALL forever WITH n\n"
+            "CUT\n"
+            "SCENE main\n"
+            "SAY CALL forever WITH 1\n"
+            "CUT\n",
+        )
+
+    def test_unknown_scene_is_a_friendly_line_numbered_error(self) -> None:
+        self.assert_friendly_error(program("CALL missing_scene"))
+
+    def test_wrong_number_of_scene_inputs_is_a_friendly_error(self) -> None:
+        self.assert_friendly_error(
+            "SCENE pair WITH left, right\n"
+            "GIVE BACK left JOIN right\n"
+            "CUT\n"
+            "SCENE main\n"
+            "SAY CALL pair WITH \"one\"\n"
+            "CUT\n",
+        )
+
+    def test_lists_can_be_created_empty_extended_and_printed(self) -> None:
+        self.assert_runs(
+            program(
+                'SET cast TO LIST "Ann", "Bob"\n'
+                'SET empty TO LIST\n'
+                'ADD "Cy" TO cast\n'
+                "SAY cast\n"
+                "SAY empty"
+            ),
+            "[Ann, Bob, Cy]\n[]\n",
+        )
+
+    def test_at_uses_one_based_counting_and_length_handles_lists_and_text(self) -> None:
+        self.assert_runs(
+            program(
+                'SET cast TO LIST "Ann", "Bob"\n'
+                "SAY cast AT 1\n"
+                "SAY LENGTH OF cast\n"
+                'SAY LENGTH OF "moons" PLUS 1'
+            ),
+            "Ann\n2\n6\n",
+        )
+
+    def test_list_at_out_of_range_is_a_friendly_error(self) -> None:
+        self.assert_friendly_error(
+            program('SET cast TO LIST "Ann"\nSAY cast AT 2')
+        )
+
+    def test_list_in_call_inputs_is_wrapped_in_parentheses(self) -> None:
+        self.assert_runs(
+            "SCENE count WITH items\n"
+            "GIVE BACK LENGTH OF items\n"
+            "CUT\n"
+            "SCENE main\n"
+            "SET cast TO LIST \"Ann\", \"Bob\"\n"
+            "SAY CALL count WITH (cast)\n"
+            "CUT\n",
+            "2\n",
+        )
+
+    def test_for_each_runs_once_per_list_item(self) -> None:
+        self.assert_runs(
+            program(
+                'SET cast TO LIST "Ann", "Bob", "Cy"\n'
+                "FOR EACH actor IN cast\n"
+                'SAY "Hello " JOIN actor\n'
+                "END"
+            ),
+            "Hello Ann\nHello Bob\nHello Cy\n",
+        )
+
+    def test_while_repeats_until_its_condition_is_false(self) -> None:
+        self.assert_runs(
+            program(
+                "SET i TO 1\n"
+                "WHILE NOT (i BIGGER THAN 3)\n"
+                "SAY i\n"
+                "SET i TO i PLUS 1\n"
+                "END"
+            ),
+            "1\n2\n3\n",
+        )
+
+    def test_non_ending_while_loop_is_a_friendly_error(self) -> None:
+        self.assert_friendly_error(
+            program("WHILE YES\nEND"), "this loop never ends"
+        )
 
 
 if __name__ == "__main__":

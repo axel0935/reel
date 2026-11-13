@@ -1,0 +1,13 @@
+SCENE item_count WITH backpack
+  GIVE BACK LENGTH OF backpack
+CUT
+
+SCENE main
+  SET backpack TO LIST "wand", "map"
+  ADD "snack" TO backpack
+  SAY "First item: " JOIN (backpack AT 1)
+  FOR EACH item IN backpack
+    SAY "Packed: " JOIN item
+  END
+  SAY "Total supplies: " JOIN (CALL item_count WITH (backpack))
+CUT

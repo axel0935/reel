@@ -1,0 +1,12 @@
+SCENE blast_off WITH number
+  SAY "Rocket " JOIN number JOIN " launches!"
+CUT
+
+SCENE main
+  SET seconds TO 3
+  WHILE seconds BIGGER THAN 0
+    SAY seconds
+    SET seconds TO seconds MINUS 1
+  END
+  CALL blast_off WITH 7
+CUT

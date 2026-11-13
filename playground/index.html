@@ -21,7 +21,7 @@
 
       <div class="controls-panel">
         <div class="control-group">
-          <label for="example-select" class="control-label">Scene Script:</label>
+          <label for="example-select" class="control-label">Scene:</label>
           <div class="select-wrapper">
             <select id="example-select">
               <option value="" disabled selected>Loading scenes...</option>
@@ -33,6 +33,11 @@
           <span class="btn-icon">▶</span>
           <span class="btn-text">Action!</span>
           <kbd class="shortcut-badge">Ctrl+Enter</kbd>
+        </button>
+
+        <button id="share-btn" class="btn btn-secondary" title="Copy shareable link with this code">
+          <span class="btn-icon">🔗</span>
+          <span class="btn-text">Share</span>
         </button>
 
         <button id="clear-btn" class="btn btn-secondary" title="Clear code and output">
@@ -51,18 +56,31 @@
             <span id="current-filename">script.reel</span>
           </div>
           <div class="panel-actions">
+            <span id="line-counter" class="editor-hint">1 line</span>
+            <span class="editor-hint divider">&bull;</span>
             <span class="editor-hint">Tab to indent</span>
           </div>
         </div>
-        <div class="editor-wrapper">
-          <textarea
-            id="code-input"
-            spellcheck="false"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            placeholder="Write your Reel scene here...&#10;&#10;SCENE main&#10;  SAY &quot;Action!&quot;&#10;CUT"
-          ></textarea>
+
+        <div class="editor-container" id="editor-container">
+          <!-- Line Numbers Gutter -->
+          <div class="line-numbers-gutter" id="line-numbers" aria-hidden="true">
+            <div class="line-num">1</div>
+          </div>
+
+          <!-- Code Layers (Highlight Overlay + Real Textarea) -->
+          <div class="editor-content-area" id="editor-content-area">
+            <div id="error-line-highlight" class="error-line-highlight hidden" aria-hidden="true"></div>
+            <pre id="code-highlight" aria-hidden="true"><code id="code-highlight-inner"></code></pre>
+            <textarea
+              id="code-input"
+              spellcheck="false"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              placeholder="Write your Reel scene here...&#10;&#10;SCENE main&#10;  SAY &quot;Action!&quot;&#10;CUT"
+            ></textarea>
+          </div>
         </div>
       </section>
 
@@ -96,18 +114,23 @@
       </section>
     </main>
 
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
     <!-- Footer Quick Cheat Sheet -->
     <footer class="studio-footer">
       <div class="quick-ref">
-        <span class="ref-title">Quick Keywords:</span>
-        <code>SCENE main ... CUT</code>
-        <code>SET x TO y</code>
-        <code>SAY expression</code>
-        <code>IF cond ... OTHERWISE ... END</code>
-        <code>REPEAT n TIMES ... END</code>
+        <span class="ref-title">Reel Keywords:</span>
+        <code>SCENE ... CUT</code>
+        <code>CALL ... WITH</code>
+        <code>GIVE BACK</code>
+        <code>LIST</code>
+        <code>FOR EACH ... IN</code>
+        <code>WHILE</code>
+        <code>IF ... OTHERWISE ... END</code>
       </div>
       <div class="footer-meta">
-        Reel v0.1 &bull; Powered by Python Standard Library
+        Reel Studio &bull; Safe execution with 5s timeout &bull; 127.0.0.1
       </div>
     </footer>
   </div>

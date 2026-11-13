@@ -1,0 +1,8 @@
+SCENE greet WITH visitor, planet
+  SAY "Welcome, " JOIN visitor JOIN " from " JOIN planet JOIN "!"
+CUT
+
+SCENE main
+  CALL greet WITH "Zorp", "Mars"
+  CALL greet WITH "Luna", "Europa"
+CUT

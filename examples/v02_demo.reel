@@ -1,0 +1,18 @@
+SCENE double WITH n
+  GIVE BACK n TIMES 2
+CUT
+
+SCENE main
+  SET cast TO LIST "Ann", "Bob", "Cy"
+  ADD "Dee" TO cast
+  FOR EACH actor IN cast
+    SAY "Hello " JOIN actor
+  END
+  SET total TO 0
+  SET i TO 1
+  WHILE NOT (i BIGGER THAN LENGTH OF cast)
+    SET total TO total PLUS (CALL double WITH i)
+    SET i TO i PLUS 1
+  END
+  SAY "Total: " JOIN total
+CUT

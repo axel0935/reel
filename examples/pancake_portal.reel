@@ -1,0 +1,9 @@
+SCENE triple WITH pancakes
+  GIVE BACK pancakes TIMES 3
+CUT
+
+SCENE main
+  SET stack TO CALL triple WITH 2
+  SAY "Portal pancakes: " JOIN stack
+  SAY "With one bonus: " JOIN (stack PLUS 1)
+CUT

@@ -1,15 +1,18 @@
 """Parser: turns tokens into a program made of scenes and statements."""
 
 from .errors import ReelError
-from .lexer import Token
 
 # Expression AST node kinds:
 #   ("num", value) ("str", value) ("bool", value) ("name", name)
+#   ("nothing",) ("list", [exprs]) ("call", name, [exprs], line)
+#   ("length", expr) ("at", base, index)
 #   ("bin", op, left, right) ("not", expr)
 # Statement node kinds:
 #   ("set", name, expr, line) ("say", expr, line)
 #   ("if", cond, then_body, else_body, line)
 #   ("repeat", count_expr, body, line)
+#   ("while", cond, body, line) ("foreach", var, expr, body, line)
+#   ("call", name, [exprs], line) ("giveback", expr, line) ("add", expr, name, line)
 
 
 class Parser:
@@ -56,13 +59,15 @@ class Parser:
             return "some text"
         if tok.kind == "NUMBER":
             return str(tok.value)
+        if tok.kind == "NEWLINE":
+            return "the end of the line"
         return f'"{tok.value}"'
 
     def error_here(self, message):
         t = self.peek()
         return ReelError(t.line, message)
 
-    # ---------- program ----------
+    # ---------- program & scenes ----------
 
     def parse_program(self):
         scenes = []
@@ -77,11 +82,24 @@ class Parser:
         name_tok = self.next()
         if name_tok.kind != "NAME":
             raise ReelError(name_tok.line, 'After SCENE I need a name, like "SCENE main".')
+        params = []
+        if self.at_word("WITH"):
+            self.next()
+            params.append(self.expect_param_name())
+            while self.peek().kind == "COMMA":
+                self.next()
+                params.append(self.expect_param_name())
         self.expect_newline()
         body = self.parse_statements(until={"CUT"})
         self.expect_word("CUT")
         self.expect_newline()
-        return {"name": name_tok.value, "body": body, "line": start.line}
+        return {"name": name_tok.value, "params": params, "body": body, "line": start.line}
+
+    def expect_param_name(self):
+        t = self.next()
+        if t.kind != "NAME":
+            raise ReelError(t.line, "After WITH I need input names, like: SCENE greet WITH name")
+        return t.value
 
     def parse_statements(self, until):
         """Parse statements until one of the words in `until` (or EOF)."""
@@ -117,7 +135,23 @@ class Parser:
             return self.parse_if()
         if t.value == "REPEAT":
             return self.parse_repeat()
-        raise ReelError(t.line, f'I do not understand "{t.value}" here. Try SET, SAY, IF or REPEAT.')
+        if t.value == "WHILE":
+            return self.parse_while()
+        if t.value == "FOR":
+            return self.parse_foreach()
+        if t.value == "CALL":
+            node = self.parse_call(stop={"NEWLINE", "EOF"})
+            self.expect_newline()
+            return node
+        if t.value == "GIVE":
+            return self.parse_giveback()
+        if t.value == "ADD":
+            return self.parse_add_statement()
+        raise ReelError(
+            t.line,
+            f'I do not understand "{t.value}" here. '
+            "Try SET, SAY, IF, REPEAT, WHILE, FOR EACH, CALL, GIVE BACK or ADD.",
+        )
 
     def parse_set(self):
         start = self.expect_word("SET")
@@ -158,6 +192,63 @@ class Parser:
         self.expect_word("END")
         self.expect_newline()
         return ("repeat", count, body, start.line)
+
+    def parse_while(self):
+        start = self.expect_word("WHILE")
+        cond = self.parse_expr(stop={"NEWLINE"})
+        self.expect_newline()
+        body = self.parse_statements(until={"END"})
+        self.expect_word("END")
+        self.expect_newline()
+        return ("while", cond, body, start.line)
+
+    def parse_foreach(self):
+        start = self.expect_word("FOR")
+        self.expect_word("EACH")
+        var_tok = self.next()
+        if var_tok.kind != "NAME":
+            raise ReelError(var_tok.line, "After FOR EACH I need a name for each item.")
+        self.expect_word("IN")
+        expr = self.parse_expr(stop={"NEWLINE"})
+        self.expect_newline()
+        body = self.parse_statements(until={"END"})
+        self.expect_word("END")
+        self.expect_newline()
+        return ("foreach", var_tok.value, expr, body, start.line)
+
+    def parse_call(self, stop):
+        """Parse CALL name [WITH arg, arg, ...]. Returns a call node."""
+        start = self.expect_word("CALL")
+        name_tok = self.next()
+        if name_tok.kind != "NAME":
+            raise ReelError(name_tok.line, 'After CALL I need a scene name, like CALL greet WITH "Ann".')
+        args = []
+        if self.at_word("WITH"):
+            self.next()
+            while not self.at_stop(stop) and self.peek().kind != "RPAREN":
+                args.append(self.parse_expr(stop))
+                if self.peek().kind == "COMMA":
+                    self.next()
+                    continue
+                break
+        return ("call", name_tok.value, args, start.line)
+
+    def parse_giveback(self):
+        start = self.expect_word("GIVE")
+        self.expect_word("BACK")
+        expr = self.parse_expr(stop={"NEWLINE", "OTHERWISE", "END", "CUT", "EOF"})
+        self.expect_newline()
+        return ("giveback", expr, start.line)
+
+    def parse_add_statement(self):
+        start = self.expect_word("ADD")
+        expr = self.parse_expr(stop={"TO", "NEWLINE", "EOF"})
+        self.expect_word("TO")
+        name_tok = self.next()
+        if name_tok.kind != "NAME":
+            raise ReelError(name_tok.line, "After ADD ... TO I need the name of a list.")
+        self.expect_newline()
+        return ("add", expr, name_tok.value, start.line)
 
     # ---------- expressions ----------
     # stop contains token *kinds* ("NEWLINE", "EOF") or WORD values ("TIMES", ...)
@@ -236,8 +327,18 @@ class Parser:
             return left
 
     def parse_unary(self, stop):
-        # MINUS as a negative sign is not in the spec; keep it simple.
-        return self.parse_primary(stop)
+        if self.at_word("LENGTH") and "LENGTH" not in stop:
+            start = self.next()
+            self.expect_word("OF")
+            operand = self.parse_unary(stop)
+            return ("length", operand, start.line)
+        node = self.parse_primary(stop)
+        # postfix: cast AT 1
+        while self.at_word("AT") and "AT" not in stop:
+            self.next()
+            index = self.parse_unary(stop)
+            node = ("at", node, index)
+        return node
 
     def parse_primary(self, stop):
         t = self.next()
@@ -258,7 +359,28 @@ class Parser:
                 return ("bool", True)
             if t.value == "NO":
                 return ("bool", False)
+            if t.value == "NOTHING":
+                return ("nothing",)
+            if t.value == "LIST":
+                return self.parse_list(stop)
+            if t.value == "CALL":
+                self.pos -= 1  # let parse_call consume CALL itself
+                return self.parse_call(stop)
         raise ReelError(t.line, f'I do not understand {self.describe(t)} here.')
+
+    def parse_list(self, stop):
+        items = []
+        while (
+            not self.at_stop(stop)
+            and self.peek().kind not in ("COMMA", "RPAREN")
+        ):
+            items.append(self.parse_expr(stop))
+            if self.peek().kind == "COMMA":
+                self.next()
+                continue
+            break
+        # allow a trailing comma-free end; a comma right before the end is an error
+        return ("list", items)
 
 
 def parse(tokens):

@@ -21,8 +21,18 @@
   --text-muted: #8e99a8;
   --text-code: #e1e7f0;
 
+  /* Syntax Highlighting Colors */
+  --hl-keyword: #f5a623;
+  --hl-string: #7bed9f;
+  --hl-number: #70a1ff;
+  --hl-comment: #8b949e;
+
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Consolas, Menlo, monospace;
+
+  --editor-line-height: 22px;
+  --editor-font-size: 14px;
+  --editor-padding: 16px;
 }
 
 * {
@@ -107,7 +117,7 @@ body {
 .controls-panel {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -161,7 +171,7 @@ select:focus {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 16px;
+  padding: 9px 15px;
   border-radius: 6px;
   font-size: 0.88rem;
   font-weight: 600;
@@ -169,6 +179,7 @@ select:focus {
   cursor: pointer;
   border: 1px solid transparent;
   transition: all 0.15s ease-in-out;
+  user-select: none;
 }
 
 .btn-action {
@@ -209,16 +220,22 @@ select:focus {
   border-color: #434c69;
 }
 
+.btn-secondary.copied {
+  background-color: rgba(46, 213, 115, 0.15);
+  color: #2ed573;
+  border-color: #2ed573;
+}
+
 /* Studio Workspace Layout */
 .studio-workspace {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   flex: 1;
-  min-height: 520px;
+  min-height: 540px;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .studio-workspace {
     grid-template-columns: 1fr;
   }
@@ -254,13 +271,19 @@ select:focus {
   text-transform: uppercase;
 }
 
-.panel-title .icon {
-  font-size: 1rem;
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .editor-hint {
   color: var(--text-muted);
   font-size: 0.75rem;
+}
+
+.editor-hint.divider {
+  opacity: 0.5;
 }
 
 .panel-status {
@@ -300,33 +323,153 @@ select:focus {
   to { opacity: 1; }
 }
 
-/* Editor Area */
-.editor-wrapper {
+/* Editor Gutter and Layer Container */
+.editor-container {
+  display: flex;
   flex: 1;
   position: relative;
-  display: flex;
+  background-color: var(--bg-input);
+  min-height: 460px;
+  overflow: hidden;
 }
 
-textarea#code-input {
+/* Line Numbers Gutter */
+.line-numbers-gutter {
+  width: 48px;
+  min-width: 48px;
+  padding: var(--editor-padding) 8px var(--editor-padding) 4px;
+  text-align: right;
+  background-color: #0c0e14;
+  border-right: 1px solid var(--border-color);
+  color: #50586c;
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size);
+  line-height: var(--editor-line-height);
+  user-select: none;
+  overflow: hidden;
+}
+
+.line-num {
+  height: var(--editor-line-height);
+  line-height: var(--editor-line-height);
+  padding-right: 6px;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.line-num.error-line {
+  color: #ffffff;
+  background-color: var(--accent-red);
+  border-radius: 3px;
+  font-weight: 700;
+  box-shadow: 0 0 6px rgba(255, 71, 87, 0.6);
+}
+
+/* Editor Workspace (Overlay Layers) */
+.editor-content-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Faulty Line Highlight Band */
+.error-line-highlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--editor-line-height);
+  background-color: rgba(255, 71, 87, 0.22);
+  border-left: 3px solid var(--accent-red);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.15s;
+}
+
+.error-line-highlight.hidden {
+  display: none;
+}
+
+/* Highlighting Layer (Pre) */
+#code-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  min-height: 440px;
-  padding: 18px;
-  background-color: var(--bg-input);
-  color: var(--text-code);
-  font-family: var(--font-mono);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  margin: 0;
+  padding: var(--editor-padding);
   border: none;
+  box-sizing: border-box;
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size);
+  line-height: var(--editor-line-height);
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+  color: var(--text-code);
+  tab-size: 2;
+  -moz-tab-size: 2;
+}
+
+#code-highlight-inner {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Syntax Highlighting Token Styles */
+.hl-keyword {
+  color: var(--hl-keyword);
+  font-weight: 600;
+}
+
+.hl-string {
+  color: var(--hl-string);
+}
+
+.hl-number {
+  color: var(--hl-number);
+}
+
+.hl-comment {
+  color: var(--hl-comment);
+  font-style: italic;
+}
+
+/* Interactive Textarea Layer */
+textarea#code-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: var(--editor-padding);
+  border: none;
+  box-sizing: border-box;
+  background: transparent;
+  color: transparent;
+  caret-color: #f5a623;
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size);
+  line-height: var(--editor-line-height);
+  white-space: pre;
+  overflow: auto;
   resize: none;
   outline: none;
+  z-index: 3;
   tab-size: 2;
-  white-space: pre;
+  -moz-tab-size: 2;
 }
 
 textarea#code-input::placeholder {
   color: #434c62;
   font-style: italic;
+}
+
+textarea#code-input::selection {
+  background: rgba(245, 166, 35, 0.35);
+  color: transparent;
 }
 
 /* Screening Room / Output Area */
@@ -336,7 +479,7 @@ textarea#code-input::placeholder {
   flex-direction: column;
   position: relative;
   background-color: #090a0f;
-  min-height: 440px;
+  min-height: 460px;
 }
 
 /* Error Banner */
@@ -404,6 +547,30 @@ textarea#code-input::placeholder {
   right: 0;
   height: 60px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1a1e2b;
+  color: #f1f2f6;
+  border: 1px solid var(--accent-gold);
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.toast.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 10px);
 }
 
 /* Footer */

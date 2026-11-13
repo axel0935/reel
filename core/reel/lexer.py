@@ -4,8 +4,11 @@ from .errors import ReelError
 
 KEYWORDS = {
     "SCENE", "SET", "TO", "SAY", "IF", "OTHERWISE", "END", "REPEAT",
-    "TIMES", "CUT", "PLUS", "MINUS", "TIMES", "DIVIDED", "BY", "JOIN",
+    "TIMES", "CUT", "PLUS", "MINUS", "DIVIDED", "BY", "JOIN",
     "EQUALS", "BIGGER", "THAN", "SMALLER", "AND", "OR", "NOT", "YES", "NO",
+    # v0.2
+    "WITH", "CALL", "GIVE", "BACK", "NOTHING", "LIST", "ADD", "AT",
+    "LENGTH", "OF", "FOR", "EACH", "IN", "WHILE",
 }
 
 
@@ -51,6 +54,10 @@ def _lex_line(line, lineno):
     while i < n:
         ch = line[i]
         if ch in " \t\r":
+            i += 1
+            continue
+        if ch == ",":
+            tokens.append(Token("COMMA", ",", lineno))
             i += 1
             continue
         if ch == "(":
