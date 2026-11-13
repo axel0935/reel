@@ -6,7 +6,7 @@ explain everything in plain, simple English.
 
 ## Who works where
 - Devin: ONLY edit `core/` and `reel.py`
-- Codex: ONLY edit `tests/` and `examples/`
+- Codex: ONLY edit `tests/`, `examples/`, `README.md` and `.github/`
 - Antigravity: ONLY edit `playground/`
 - Everyone may ADD lines at the bottom of `docs/PROGRESS.md`
 
