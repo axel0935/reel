@@ -1,0 +1,6 @@
+SCENE main
+  SET dance_move TO "beep-boop"
+  REPEAT 4 TIMES
+    SAY dance_move JOIN " shuffle!"
+  END
+CUT

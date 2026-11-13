@@ -1,0 +1,9 @@
+SCENE main
+  SET cookies TO 10.0
+  SET friends TO 2
+  SET cookies_each TO cookies DIVIDED BY friends
+  SAY "Cookies per time traveler: " JOIN cookies_each
+  IF NOT (cookies_each SMALLER THAN 5)
+    SAY "Enough snacks for 1985!"
+  END
+CUT

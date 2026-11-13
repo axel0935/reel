@@ -1,0 +1,14 @@
+SCENE main
+  -- a tiny story
+  SET hero TO 10
+  SET villain TO hero PLUS 5
+  SAY "Hello, world"
+  IF villain BIGGER THAN 12
+    SAY "The villain wins"
+  OTHERWISE
+    SAY "The hero wins"
+  END
+  REPEAT 3 TIMES
+    SAY "Action!"
+  END
+CUT

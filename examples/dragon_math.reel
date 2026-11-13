@@ -1,0 +1,6 @@
+SCENE main
+  SET gold TO 12
+  SET treasure TO gold TIMES 3 PLUS 4
+  SAY "Dragon treasure: " JOIN treasure
+  SAY "Treasure is huge: " JOIN (treasure BIGGER THAN 30)
+CUT

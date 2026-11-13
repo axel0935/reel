@@ -1,0 +1,7 @@
+SCENE main
+  -- The crew needs exactly three cosmic meows.
+  SET captain TO "Mittens"
+  REPEAT 3 TIMES
+    SAY captain JOIN " says: meow from Mars!"
+  END
+CUT

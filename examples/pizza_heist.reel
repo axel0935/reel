@@ -1,0 +1,9 @@
+SCENE main
+  SET slices TO 8
+  SET hungry_robots TO 3
+  IF slices BIGGER THAN hungry_robots
+    SAY "The robots share the moon pizza."
+  OTHERWISE
+    SAY "Order more moon pizza!"
+  END
+CUT
