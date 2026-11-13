@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reel Studio &bull; Online Demo</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Bar / Navigation -->
+    <header class="top-nav">
+      <div class="brand">
+        <span class="clapper-icon" aria-hidden="true">🎬</span>
+        <div>
+          <h1 class="logo">REEL <span class="tag">STUDIO</span></h1>
+          <p class="tagline">The script-writing programming language &bull; In-Browser Demo</p>
+        </div>
+      </div>
+
+      <div class="controls-panel">
+        <div class="control-group">
+          <label for="example-select" class="control-label">Scene:</label>
+          <div class="select-wrapper">
+            <select id="example-select">
+              <option value="" disabled selected>Loading scenes...</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="run-btn" class="btn btn-action" disabled title="Run scene (Ctrl+Enter)">
+          <span class="btn-icon">▶</span>
+          <span class="btn-text">Loading engine...</span>
+          <kbd class="shortcut-badge">Ctrl+Enter</kbd>
+        </button>
+
+        <button id="share-btn" class="btn btn-secondary" title="Copy shareable link with this code">
+          <span class="btn-icon">🔗</span>
+          <span class="btn-text">Share</span>
+        </button>
+
+        <button id="clear-btn" class="btn btn-secondary" title="Clear code and output">
+          Reset
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Studio Split View -->
+    <main class="studio-workspace">
+      <!-- Editor Column -->
+      <section class="panel editor-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon">📜</span>
+            <span id="current-filename">script.reel</span>
+          </div>
+          <div class="panel-actions">
+            <span id="line-counter" class="editor-hint">1 line</span>
+            <span class="editor-hint divider">&bull;</span>
+            <span class="editor-hint">Tab to indent</span>
+          </div>
+        </div>
+
+        <div class="editor-container" id="editor-container">
+          <!-- Line Numbers Gutter -->
+          <div class="line-numbers-gutter" id="line-numbers" aria-hidden="true">
+            <div class="line-num">1</div>
+          </div>
+
+          <!-- Code Layers (Highlight Overlay + Real Textarea) -->
+          <div class="editor-content-area" id="editor-content-area">
+            <div id="error-line-highlight" class="error-line-highlight hidden" aria-hidden="true"></div>
+            <pre id="code-highlight" aria-hidden="true"><code id="code-highlight-inner"></code></pre>
+            <textarea
+              id="code-input"
+              spellcheck="false"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              placeholder="Write your Reel scene here...&#10;&#10;SCENE main&#10;  SAY &quot;Action!&quot;&#10;CUT"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screening Room (Output) Column -->
+      <section class="panel output-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon">📽️</span>
+            <span>Screening Room</span>
+          </div>
+          <div class="panel-status">
+            <span id="status-indicator" class="status-dot loading"></span>
+            <span id="status-text">Downloading Pyodide (~10 MB)...</span>
+          </div>
+        </div>
+
+        <div class="output-wrapper">
+          <div id="error-banner" class="error-banner hidden" role="alert">
+            <div class="error-header">
+              <span class="error-icon">⚠️</span>
+              <strong id="error-title">Scene Interrupted</strong>
+            </div>
+            <div id="error-message" class="error-body"></div>
+          </div>
+
+          <div class="console-screen">
+            <div class="screen-glare"></div>
+            <pre id="output-box" class="output-content">Downloading in-browser Python runtime (Pyodide, ~10 MB)...
+Please wait a few moments on initial load.</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <!-- Footer Quick Cheat Sheet -->
+    <footer class="studio-footer">
+      <div class="quick-ref">
+        <span class="ref-title">Reel Keywords:</span>
+        <code>SCENE ... CUT</code>
+        <code>IMPORT LIB "name"</code>
+        <code>CALL ... WITH</code>
+        <code>GIVE BACK</code>
+        <code>LIST</code>
+        <code>FOR EACH ... IN</code>
+        <code>WHILE</code>
+      </div>
+      <div class="footer-meta">
+        Reel Online &bull; Runs 100% in your browser via Pyodide &bull; Safe mode
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

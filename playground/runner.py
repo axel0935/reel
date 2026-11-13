@@ -26,7 +26,7 @@ except Exception as err:
 def main():
     try:
         source = sys.stdin.read()
-        result = run(source)
+        result = run(source, safe=True)
     except Exception as err:
         result = {"output": "", "error": f"Execution failed: {err}"}
     sys.stdout.write(json.dumps(result))
