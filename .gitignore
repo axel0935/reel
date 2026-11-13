@@ -1,3 +1,7 @@
 .devin/
 __pycache__/
 *.pyc
+reel_files/
+site/reel.zip
+site/examples/
+site/examples.json

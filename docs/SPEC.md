@@ -1,4 +1,4 @@
-# Reel language: Spec v0.2
+# Reel language: Spec v0.3
 
 A program is a list of scenes. Execution starts at `SCENE main`.
 A scene ends with `CUT`. Keywords are UPPERCASE. Variable names use
@@ -94,3 +94,71 @@ Example: `Line 4: I don't know "villain". Did you SET it first?`
     CUT
 
 Expected output: Hello Ann / Hello Bob / Hello Cy / Hello Dee / Total: 20
+
+
+# v0.3 additions (v0.1 and v0.2 rules still apply)
+
+## Calling a scene with no input
+A scene with no inputs is called with just `CALL name` (no WITH).
+
+## Safe mode
+Reel can run in "safe mode" (used by the online site and the playground).
+In safe mode, file functions and `IMPORT "name"` are turned off and give the
+friendly error: `Line 3: Files are turned off here.` (or `Importing files
+is turned off here.`). `IMPORT LIB` still works.
+
+## IMPORT
+- `IMPORT "name"` (written at the top of the file, before any SCENE) loads
+  `name.reel` from the same folder as the running file.
+- `IMPORT LIB "name"` loads a library that ships with Reel
+  (core/reel/lib/name.reel).
+- Only the scenes of an imported file are loaded. Its `SCENE main` is ignored.
+- Two scenes with the same name, or a scene named like a built-in scene,
+  give a friendly error. Circular imports give a friendly error.
+- Errors inside an imported file name that file: `maths.reel, Line 4: ...`
+- Libraries that ship with Reel (written in Reel itself):
+  - `maths`: max_of WITH a, b / min_of WITH a, b / average WITH list
+    (an empty list gives 0) / is_even WITH n / power WITH base, times
+    (times is a whole number, 0 or more)
+  - `fun`: shout WITH text (upper case + "!") / coin_flip ("heads" or "tails")
+    / dice (a whole number from 1 to 6)
+
+## Built-in scenes (always available, called with CALL)
+Chance
+- `random_between WITH low, high`: a whole number from low to high, both included
+- `random_pick WITH list`: one random item (empty list = friendly error)
+- `shuffle WITH list`: a new list in random order
+Words
+- `upper WITH text` / `lower WITH text` / `trim WITH text`
+- `split WITH text, separator`: a list of texts
+- `glue WITH list, separator`: one text
+- `replace WITH text, old, new`
+- `contains WITH text, part`: YES or NO (also works with a list and an item)
+- `starts_with WITH text, part`: YES or NO
+- `to_number WITH text`: a number (not a number = friendly error)
+Dates (a date is a text like "2026-11-13"; a wrong date = friendly error)
+- `today`: today's date / `now`: the time as "HH:MM" (24 hours)
+- `days_between WITH date1, date2`: whole number (date2 minus date1)
+- `add_days WITH date, n`: a date / `weekday WITH date`: "Monday", "Tuesday"...
+Files (turned off in safe mode)
+- `read_file WITH name` (text) / `read_lines WITH name` (list of texts)
+- `write_file WITH name, text` (replaces) / `append_file WITH name, text`
+- `file_exists WITH name`: YES or NO
+- Files live ONLY in a folder called `reel_files` next to the program
+  (created at the first write). A name must be a simple file name: no `/`,
+  no `..`. A file may not be bigger than 1 MB. A missing file = friendly error.
+
+## Example (examples/v03_demo.reel)
+    IMPORT LIB "fun"
+
+    SCENE main
+      SET roll TO CALL dice
+      SAY "You rolled " JOIN roll
+      SET d TO CALL today
+      SAY "Today is " JOIN (CALL weekday WITH d)
+      SET words TO CALL split WITH "the quick brown fox", " "
+      SAY CALL shout WITH (CALL random_pick WITH words)
+    CUT
+
+Expected: a line with a number from 1 to 6, a line with today's weekday in
+English, then one of the four words in capitals followed by "!".
